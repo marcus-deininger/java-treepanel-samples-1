@@ -1,4 +1,4 @@
-package basic;
+package trees.samples.basic;
 
 public class Main {
 	

@@ -1,6 +1,5 @@
-package elaborated;
+package trees.samples.references;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -15,15 +14,15 @@ import trees.style.Shape;
 import trees.style.Size;
 import trees.style.Style;
 
-public class Sample2 {
+public class SampleAbego {
 	
 	public static void main(String[] args) {
 				
 		Node root = new Node("root", 
 				new Node("n1",
-						new Node("n1.1\n(first node)"),
+						new Node("n1.1"),
 						new Node("n1.2"),
-						new Node("n1.3\n(last node) + extra text")), 
+						new Node("n1.3")), 
 				new Node("n2", 
 						new Node("n2.1")),
 				new Node("n3"));
@@ -53,7 +52,6 @@ public class Sample2 {
 		menu.add(menuItem);	
 		frame.setJMenuBar(menuBar);
 
-		frame.setPreferredSize(new Dimension(400, 250));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationByPlatform(true);
 		frame.pack();
