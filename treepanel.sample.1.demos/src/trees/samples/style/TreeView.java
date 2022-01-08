@@ -1,4 +1,4 @@
-package full;
+package trees.samples.style;
 
 import static trees.style.Alignment.*;
 import static trees.style.Orientation.*;
@@ -10,9 +10,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Method;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
@@ -33,16 +30,20 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import trees.panel.TreePanel;
-import trees.panel.TreePanel.NodeSelector;
 import trees.style.Alignment;
 import trees.style.Orientation;
 import trees.style.Shape;
 import trees.style.Size;
 import trees.style.Style;
+import trees.style.sizes.Fixed;
+import trees.style.sizes.MaxVariable;
+import trees.style.sizes.MinVariable;
+import trees.style.sizes.RestrictedVariable;
+import trees.style.sizes.Variable;
 
 
 @SuppressWarnings("serial")
-public class TreeView extends JFrame implements Observer{
+public class TreeView extends JFrame{
 	
 	private static final int WIDTH = 600, HEIGHT = 450;
 
@@ -61,11 +62,17 @@ public class TreeView extends JFrame implements Observer{
 	private static final int INITIAL_SUBTREE_SEPARATION = 40;
 	private static final int INITIAL_LEVEL_SEPARATION = 60;
 	
+	private static final int INITIAL_BOX_SIZE = 20;
+	
 
 	// Define functionals widgets here
 	private JButton clearButton, addNodeButton, addBinaryNodeButton, deleteButton;
 	private SpinnerNumberModel fontSizeModel;
+	private SpinnerNumberModel minSizeModelWidth, minSizeModelHeight; 
+	private SpinnerNumberModel maxSizeModelWidth, maxSizeModelHeight;
 	
+
+	private Font initialFont;
 
 	private Node root, selection;
 	private TreePanel<Node> treePanel;
@@ -94,7 +101,6 @@ public class TreeView extends JFrame implements Observer{
 		this.setContentPane(panel);
 		
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-//		this.setResizable(false);
 		this.setLocationByPlatform(true);
 		this.pack();
 		this.setVisible(true);
@@ -105,13 +111,18 @@ public class TreeView extends JFrame implements Observer{
 		// initialize functional widgets here
 				
 		Style style = new Style(INITIAL_SIBLING_SEPARATION, INITIAL_SUBTREE_SEPARATION, INITIAL_LEVEL_SEPARATION);
-
+		style.setMaxDepth(INITIAL_DEPTH);
+		
 		fontSizeModel = new SpinnerNumberModel(INITIAL_FONT_SIZE, 1, 128, 1);
-		Font initialFont = new Font(CORE_FONTS[INITIAL_FONT], 0, INITIAL_FONT_SIZE);
-		style.setFont(initialFont);		
+		initialFont = new Font(CORE_FONTS[INITIAL_FONT], 0, INITIAL_FONT_SIZE);
+		style.setFont(initialFont);	
+		
+		minSizeModelWidth = new SpinnerNumberModel(INITIAL_BOX_SIZE, 1, 1000, 1);
+		minSizeModelHeight = new SpinnerNumberModel(INITIAL_BOX_SIZE, 1, 1000, 1);
+		maxSizeModelWidth = new SpinnerNumberModel(INITIAL_BOX_SIZE, 1, 1000, 1);
+		maxSizeModelHeight = new SpinnerNumberModel(INITIAL_BOX_SIZE, 1, 1000, 1);
 		
 		treePanel = new TreePanel<>(style, root);		
-		treePanel.addObserver(this);
 	}
 	
 	private JMenuBar createMenuLayout(){
@@ -128,10 +139,10 @@ public class TreeView extends JFrame implements Observer{
 		menu = new JMenu("Samples");
 		menuBar.add(menu);
 
-		submenu = new JMenu("Sample 1");
+		submenu = new JMenu("Sample 1 (J.Q. Walker's Sample)");
 		menu.add(submenu);
 		final String about1 = "This is the layout example as described in the paper:\n" + 
-				"Walker, JQ II: A node-positioning algorithm for general trees.\n" + 
+				"Walker, J.Q. II: A node-positioning algorithm for general trees.\n" + 
 				"Software-Practice and Experience 1990; 20(7):685-705.";
 
 		menuItem = new JMenuItem("About ...");
@@ -151,6 +162,7 @@ public class TreeView extends JFrame implements Observer{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				sample1();
+				treePanel.repaint();
 			}
 			
 		});
@@ -158,7 +170,7 @@ public class TreeView extends JFrame implements Observer{
 
 		//*********************
 
-		submenu = new JMenu("Sample2");
+		submenu = new JMenu("Sample2 (abego-Sample)");
 		menu.add(submenu);
 		final String about2 = "This is the layout example as implemented for:\n" + 
 				"abego TreeLayout (code.google.com/p/treelayout)\n";
@@ -181,6 +193,7 @@ public class TreeView extends JFrame implements Observer{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				sample2();
+				treePanel.repaint();
 			}
 			
 		});
@@ -188,7 +201,7 @@ public class TreeView extends JFrame implements Observer{
 		
 		//*********************
 		
-		submenu = new JMenu("Sample3");
+		submenu = new JMenu("Sample3 (Binary Tree)");
 		menu.add(submenu);
 		final String about3 = "This is a sample for using binary trees\nwith different node classes.";
 
@@ -210,6 +223,7 @@ public class TreeView extends JFrame implements Observer{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				sample3();
+				treePanel.repaint();
 			}
 			
 		});
@@ -268,6 +282,7 @@ public class TreeView extends JFrame implements Observer{
 					treePanel.getStyle().setRootPointer("root");
 				else
 					treePanel.getStyle().setRootPointer(null);
+				treePanel.repaint();
 			}
 			
 		});
@@ -280,6 +295,7 @@ public class TreeView extends JFrame implements Observer{
 			public void actionPerformed(ActionEvent e) {
 				AbstractButton button = (AbstractButton)e.getSource();
 				treePanel.getStyle().setPointerBoxes(button.isSelected());
+				treePanel.repaint();
 			}
 			
 		});
@@ -297,6 +313,7 @@ public class TreeView extends JFrame implements Observer{
 					treePanel.getStyle().setPlaceHolder(button.isSelected());
 				else
 					treePanel.getStyle().setPlaceHolder(selection.getClass(), button.isSelected());
+				treePanel.repaint();
 			}
 			
 		});
@@ -308,36 +325,40 @@ public class TreeView extends JFrame implements Observer{
 
 		group = new ButtonGroup();
 		rbMenuItem = new JRadioButtonMenuItem("Reactangle");
+		rbMenuItem.setSelected(treePanel.getStyle().getShape() == Shape.RECTANGLE);
 		rbMenuItem.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				AbstractButton button = (AbstractButton)e.getSource();
-				if(button.isSelected())
+				if(button.isSelected()){
 					if(selection == null)
 						treePanel.getStyle().setShape(Shape.RECTANGLE);
 					else
 						treePanel.getStyle().setShape(selection.getClass(), Shape.RECTANGLE);
+					treePanel.repaint();
+				}
 			}			
 		});
-		rbMenuItem.setSelected(true);
 		group.add(rbMenuItem);
 		menu.add(rbMenuItem);
 
 		rbMenuItem = new JRadioButtonMenuItem("Rounded Rectangle");
+		rbMenuItem.setSelected(treePanel.getStyle().getShape() == Shape.ROUNDED_RECTANGLE);
 		rbMenuItem.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				AbstractButton button = (AbstractButton)e.getSource();
-				if(button.isSelected())
+				if(button.isSelected()){
 					if(selection == null)
 						treePanel.getStyle().setShape(Shape.ROUNDED_RECTANGLE);
 					else
 						treePanel.getStyle().setShape(selection.getClass(), Shape.ROUNDED_RECTANGLE);
+					treePanel.repaint();
+				}
 			}			
 		});
-		rbMenuItem.setSelected(false);
 		group.add(rbMenuItem);
 		menu.add(rbMenuItem);
 
@@ -357,6 +378,7 @@ public class TreeView extends JFrame implements Observer{
 					treePanel.clearSubtreeColor();
 					if(selection != null)
 						treePanel.setNodeColor(Color.GREEN, selection);
+					treePanel.repaint();
 				}
 			}			
 		});
@@ -375,6 +397,7 @@ public class TreeView extends JFrame implements Observer{
 					treePanel.clearNodeColor();
 					if(selection != null)
 						treePanel.setSubtreeColor(Color.RED, selection);
+					treePanel.repaint();
 				}
 			}			
 		});
@@ -384,14 +407,10 @@ public class TreeView extends JFrame implements Observer{
 
 		// Fonts
 		menu.addSeparator();
-		
-		submenu = new JMenu("Font");
-		menu.add(submenu);
-		for(String fontname : CORE_FONTS)
-			submenu.add(getFontMenuItem(fontname));
-		
+				
 		panel = new JPanel(new GridLayout(1, 2));
 		panel.add(new JLabel("      Size"));
+		fontSizeModel.setValue(treePanel.getStyle().getFont().getSize());
 		JSpinner spinner = new JSpinner(fontSizeModel);
         spinner.getModel().addChangeListener(new ChangeListener() {           
             @Override public void stateChanged(ChangeEvent e) {
@@ -406,79 +425,65 @@ public class TreeView extends JFrame implements Observer{
 					String fontfamily = font.getFamily();
 					font = new Font(fontfamily, 0, fontSize); 
 					treePanel.getStyle().setFont(selection.getClass(), font);
-            }
+				}
+				treePanel.repaint();
         }});
 
 		panel.add(spinner);
 		menu.add(panel);
 
+		submenu = new JMenu("Font");
+		group = new ButtonGroup();
+		for(String fontname : CORE_FONTS)
+			addFontMenuRadioButton(fontname, fontname.equals(treePanel.getStyle().getFont().getName()), group, submenu);
+		menu.add(submenu);
+		
 		
 		//////////////////////////////////////////////////////////////
 		
 		menu = new JMenu("Layout");	
 		menuBar.add(menu);
 		
-		menu.add(getLayoutItem("Sibling Sep. ", 1, INITIAL_SIBLING_SEPARATION, 
-				new Setter(){
-					@Override public void set(int value) {
-						treePanel.getStyle().setSiblingSeparation(value);
-					}}));
+		menu.add(getLayoutItem("Sibling Sep. ", 1, treePanel.getStyle().getSiblingSeparation(), 
+				(value) -> { treePanel.getStyle().setSiblingSeparation(value); }));
 	
-		menu.add(getLayoutItem("Subtree Sep. ", 1, INITIAL_SUBTREE_SEPARATION, 
-				new Setter(){
-					@Override public void set(int value) {
-						treePanel.getStyle().setSubtreeSeparation(value);
-					}}));
+		menu.add(getLayoutItem("Subtree Sep. ", 1, treePanel.getStyle().getSubtreeSeparation(), 
+				(value) -> { treePanel.getStyle().setSubtreeSeparation(value); }));
 	
-		menu.add(getLayoutItem("Level Sep. ", 1, INITIAL_LEVEL_SEPARATION, 
-				new Setter(){
-					@Override public void set(int value) {
-						treePanel.getStyle().setLevelSeparation(value);
-					}}));
+		menu.add(getLayoutItem("Level Sep. ", 1, treePanel.getStyle().getLevelSepartion(), 
+				(value) -> { treePanel.getStyle().setLevelSeparation(value); }));
 	
-		menu.add(getLayoutItem("Depth", -1, INITIAL_DEPTH, 
-				new Setter(){
-					@Override public void set(int value) {
-						treePanel.getStyle().setMaxDepth(value);
-					}}));
+		menu.add(getLayoutItem("Depth", -1, treePanel.getStyle().getMaxDepth(), 
+				(value) -> { treePanel.getStyle().setMaxDepth(value); }));
+		
 		
 		// Sizes
 		menu.addSeparator();
-		
-		menuItem = new JMenuItem("Variable");
-		menuItem.addActionListener(new ActionListener(){
+			
+		submenu = new JMenu("Sizes");
+		group = new ButtonGroup();
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(selection == null)
-					treePanel.getStyle().setSize(Size.VARIABLE());
-				else
-					treePanel.getStyle().setSize(selection.getClass(), Size.VARIABLE());
-			}			
-		});
-		menu.add(menuItem);
+		SpinnerGetter w = () -> { return (int)minSizeModelWidth.getValue(); };
+		SpinnerGetter h = () -> { return (int)minSizeModelHeight.getValue(); };
+		SpinnerGetter W = () -> { return (int)maxSizeModelWidth.getValue(); };
+		SpinnerGetter H = () -> { return (int)maxSizeModelHeight.getValue(); };
 		
-		submenu = new JMenu("Var. w/Max");
-		submenu.add(getSizeItem("MAX_VARIABLE", " w", " h"));
-		
+		menu.add(getMinSizeSpinners());
+		menu.add(getMaxSizeSpinners());
+
+		boolean isVariable = type() == SizeType.VARIABLE;
+		boolean isMinVariable = type() == SizeType.MIN_VARIABLE;
+		boolean isMaxVariable = type() == SizeType.MAX_VARIABLE;
+		boolean isRestrictedVariable = type() == SizeType.RESTRICTED_VARIABLE;
+		boolean isFixed = type() == SizeType.FIXED;
+
+		addSizeMenuRadioButton("Variable", isVariable, group, submenu, () -> { return Size.VARIABLE();});
+		addSizeMenuRadioButton("Variable w/Min", isMinVariable, group, submenu, () -> { return Size.MIN_VARIABLE(w.value(), h.value());});
+		addSizeMenuRadioButton("Variable w/Max", isMaxVariable, group, submenu,  () -> { return Size.MAX_VARIABLE(W.value(), H.value());});
+		addSizeMenuRadioButton("Variable w/Min & Max", isRestrictedVariable, group, submenu, () -> { return Size.RESTRICTED_VARIABLE(w.value(), h.value(), W.value(), H.value());});
+		addSizeMenuRadioButton("Fixed", isFixed, group, submenu, () -> { return Size.FIXED(W.value(), H.value());});
 		menu.add(submenu);
 
-		submenu = new JMenu("Var. w/Min");
-		submenu.add(getSizeItem("MIN_VARIABLE", " w", " h"));
-		menu.add(submenu);
-		
-		submenu = new JMenu("Var. w/Min & Max");
-		submenu.add(getSizeItem("RESTRICTED_VARIABLE", " w", " h", " w", " h"));
-		menu.add(submenu);
-
-		submenu = new JMenu("Fixed");
-		submenu.add(getSizeItem("FIXED", " w", " h"));
-		menu.add(submenu);		
-		
-		//////////////////////////////////////////////////////////////
-		
-		//////////////////////////////////////////////////////////////
-		
 		return menuBar;
 	}
 	
@@ -493,6 +498,7 @@ public class TreeView extends JFrame implements Observer{
 				if(button.isSelected()){
 					Style style = treePanel.getStyle();
 					style.setOrientation(orientation);
+					treePanel.repaint();
 				}
 			}
 		};
@@ -516,6 +522,7 @@ public class TreeView extends JFrame implements Observer{
 						style.setVerticalAlignment(alignment);
 					else
 						style.setHorizontalAlignment(alignment);
+					treePanel.repaint();
 				}
 			}
 			
@@ -527,9 +534,11 @@ public class TreeView extends JFrame implements Observer{
 		menu.add(rbMenuItem);
 	}
 
-	private JMenuItem getFontMenuItem(final String fontFamilyName){
-		JMenuItem menuItem = new JMenuItem(fontFamilyName);
-		menuItem.addActionListener(new ActionListener(){
+	private void addFontMenuRadioButton(final String fontFamilyName,
+			boolean selected, ButtonGroup group, JMenu menu){
+		
+		JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(fontFamilyName);
+		ActionListener actionListener = new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -539,11 +548,18 @@ public class TreeView extends JFrame implements Observer{
 					treePanel.getStyle().setFont(font);
 				else
 					treePanel.getStyle().setFont(selection.getClass(), font);
+				treePanel.repaint();
 			}
-		});
-		return menuItem;
+		};
+
+		rbMenuItem.addActionListener(actionListener);
+		rbMenuItem.setSelected(selected);
+		group.add(rbMenuItem);
+		menu.add(rbMenuItem);
 	}
 	
+	
+	@FunctionalInterface
 	interface Setter{
 		void set(int value);
 	}
@@ -562,57 +578,136 @@ public class TreeView extends JFrame implements Observer{
 		spinner.addChangeListener(new ChangeListener(){
 			@Override public void stateChanged(ChangeEvent e) {
 				setter.set((int) model.getValue());
+				treePanel.repaint();
 			}			
 		});
 		return panel;
 	}
+	
+	private enum SizeType{
+		FIXED, MAX_VARIABLE, MIN_VARIABLE, RESTRICTED_VARIABLE, VARIABLE
+	}
+	
+	private SizeType type(){
+		Size size = treePanel.getStyle().getSize(null);		
+		if(size.getClass() == MinVariable.class) return SizeType.MIN_VARIABLE;
+		if(size.getClass() == MaxVariable.class) return SizeType.MAX_VARIABLE;
+		if(size.getClass() == RestrictedVariable.class) return SizeType.RESTRICTED_VARIABLE;
+		if(size.getClass() == Fixed.class) return SizeType.FIXED;
+		if(size.getClass() == Variable.class) return SizeType.VARIABLE;
+		throw new RuntimeException("Undefinied Size Type");
+	}
 
-	private JPanel getSizeItem(String method, String ... labels){
-		final int length = labels.length;
-		Class<?>[] parameterTypes = new Class<?>[length];
-		for(int i = 0; i < length; i++)
-			parameterTypes[i] = int.class;
-		JPanel panel = new JPanel();
-		try {
-			final Method factory = Size.class.getDeclaredMethod(method, parameterTypes);
-			final JSpinner[] spinners = new JSpinner[length];
-			for(int i = 0; i < length; i++){
-				panel.add(new JLabel(labels[i]));
-				spinners[i] = new JSpinner();
-				spinners[i].setValue(40);
-				spinners[i].setPreferredSize(new Dimension(40, 20));
-				panel.add(spinners[i]);
-				spinners[i].addChangeListener(new ChangeListener() {
-					
-					Object[] params = new Integer[length];
-					@Override
-					public void stateChanged(ChangeEvent e) {
-						for(int i = 0; i < length; i++)
-							params[i] = spinners[i].getValue();
-						try {
-							Size size = (Size) factory.invoke(null, params);
-							if(selection == null)
-								treePanel.getStyle().setSize(size);
-							else
-								treePanel.getStyle().setSize(selection.getClass(), size);
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
-					}
-				});
-			}		
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	@FunctionalInterface
+	private interface SpinnerGetter{
+		int value();
+	}
+	
+	@FunctionalInterface
+	private interface TreeSize{
+		Size size();
+	}
+	
+	private void addSizeMenuRadioButton(String sizeName, boolean selected, ButtonGroup group, JMenu menu, TreeSize tree) {
+		JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(sizeName);
+		ActionListener actionListener = (e)-> {
+				if(selection == null)
+					treePanel.getStyle().setSize(tree.size());
+				else
+					treePanel.getStyle().setSize(selection.getClass(), tree.size());
+				treePanel.repaint();			
+		};
+
+		rbMenuItem.addActionListener(actionListener);
+		rbMenuItem.setSelected(selected);
+		group.add(rbMenuItem);
+		menu.add(rbMenuItem);
+	}
+
+	private static final Dimension SPINNER_SIZE = new Dimension(4, 20);
+
+	private JPanel getMinSizeSpinners(){
+		JPanel panel = new JPanel(new GridLayout(1, 3));
+		panel.add(new JLabel("   Min"));
+		
+		JSpinner widthSpinner = new JSpinner(minSizeModelWidth);
+		widthSpinner.setPreferredSize(SPINNER_SIZE);
+		panel.add(widthSpinner);
+
+		JSpinner heightSpinner = new JSpinner(minSizeModelHeight);
+		heightSpinner.setPreferredSize(SPINNER_SIZE);
+		panel.add(heightSpinner);
+	
+		ChangeListener listener = (e) -> {
+			Size size = null;
+			switch(type()){
+			case MIN_VARIABLE:
+					size = Size.MIN_VARIABLE((int)minSizeModelWidth.getValue(), (int)minSizeModelHeight.getValue());
+				break;
+			case RESTRICTED_VARIABLE:
+					size = Size.RESTRICTED_VARIABLE((int)minSizeModelWidth.getValue(), (int)minSizeModelHeight.getValue(), (int)maxSizeModelWidth.getValue(), (int)maxSizeModelHeight.getValue());
+				break;
+			default: return;
+			}
+			if(selection == null)
+				treePanel.getStyle().setSize(size);
+			else
+				treePanel.getStyle().setSize(selection.getClass(), size);
+			treePanel.repaint();			
+		};
+
+		widthSpinner.addChangeListener(listener);
+		heightSpinner.addChangeListener(listener);
+
 		return panel;
 	}
+
+	private JPanel getMaxSizeSpinners(){
+		JPanel panel = new JPanel(new GridLayout(1, 3));
+		panel.add(new JLabel("   Max"));
+		
+		JSpinner widthSpinner = new JSpinner(maxSizeModelWidth);
+		widthSpinner.setPreferredSize(SPINNER_SIZE);
+		panel.add(widthSpinner);
+
+		JSpinner heightSpinner = new JSpinner(maxSizeModelHeight);
+		heightSpinner.setPreferredSize(SPINNER_SIZE);
+		panel.add(heightSpinner);
+	
+		ChangeListener listener = (e) -> {
+			Size size = null;
+			switch(type()){
+			case MAX_VARIABLE:
+					size = Size.MIN_VARIABLE((int)maxSizeModelWidth.getValue(), (int)maxSizeModelHeight.getValue());
+				break;
+			case RESTRICTED_VARIABLE:
+					size = Size.RESTRICTED_VARIABLE((int)minSizeModelWidth.getValue(), (int)minSizeModelHeight.getValue(), (int)maxSizeModelWidth.getValue(), (int)maxSizeModelHeight.getValue());
+				break;
+			case FIXED:
+				size = Size.FIXED((int)maxSizeModelWidth.getValue(), (int)maxSizeModelHeight.getValue());
+			break;
+			default: return;
+			}
+			if(selection == null)
+				treePanel.getStyle().setSize(size);
+			else
+				treePanel.getStyle().setSize(selection.getClass(), size);
+			treePanel.repaint();			
+		};
+
+		widthSpinner.addChangeListener(listener);
+		heightSpinner.addChangeListener(listener);
+
+		return panel;
+	}
+
 	
 	private JPanel createWidgetLayout() {
 		JPanel panel = new JPanel(new BorderLayout());
 		// create the layout here - if needed define supporting widgets like labels, etc.
+		panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
-		panel.add(treePanel, BorderLayout.CENTER);
-		treePanel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+		panel.add(treePanel.addScrollPane(), BorderLayout.CENTER);
 	
 		JPanel controls = new JPanel();
 		controls.add(addNodeButton);
@@ -701,6 +796,7 @@ public class TreeView extends JFrame implements Observer{
 				treePanel.clear();
 				root = null;
 				selection = null;
+				treePanel.repaint();
 			}			
 		};
 
@@ -727,13 +823,10 @@ public class TreeView extends JFrame implements Observer{
 		        item = new JMenuItem("Clear");
 		        item.addActionListener(clearAction);
 		        add(item);
-		    }});		
- 	}
-	
-	@Override
-	public void update(Observable o, Object arg) {
-		if(o instanceof NodeSelector){
-			selection = (Node) arg;
+		    }});
+		
+		treePanel.addNodeSelectionListener((e)->{
+			selection = e.getNode();
 
 			treePanel.clearNodeColor();
 			treePanel.clearSubtreeColor();
@@ -744,8 +837,8 @@ public class TreeView extends JFrame implements Observer{
 				treePanel.setNodeColor(Color.GREEN, selection);
 			else
 				treePanel.setSubtreeColor(Color.RED, selection);				
-		}		
-	}
+		});
+ 	}
 	
 	private void sample1(){
 		selection = null;
@@ -767,33 +860,55 @@ public class TreeView extends JFrame implements Observer{
 						)));
 		
 		Style style = treePanel.getStyle();
+		style.setFont(initialFont);
+		style.setShape(Shape.RECTANGLE);
+
 		style.setSiblingSeparation(40);
 		style.setSubtreeSeparation(40);
 		style.setLevelSeparation(50);
 		style.setSize(Size.FIXED(20, 25));
+		
+		style.setRootPointer(null);
+		style.setPointerBoxes(false);
+		style.setPlaceHolder(false);
+		
+		minSizeModelWidth.setValue(20);
+		maxSizeModelWidth.setValue(20);
+		minSizeModelHeight.setValue(25);
+		maxSizeModelHeight.setValue(25);
 
 		treePanel.setTree(root);
+		
+		reInitMenu();
 	}
 	
 	private void sample2(){
 		selection = null;
 		root = new Node("root", 
 				new Node("n1",
-						new Node("n1.1\n(first node)"),
+						new Node("n1.1"),
 						new Node("n1.2"),
-						new Node("n1.3\n(last node) + extra text")), 
+						new Node("n1.3")), 
 				new Node("n2", 
 						new Node("n2.1")),
 				new Node("n3"));
 
 		Style style = treePanel.getStyle();
+		style.setFont(initialFont);
+
 		style.setSiblingSeparation(20);
 		style.setSubtreeSeparation(20);
 		style.setLevelSeparation(45);
 		style.setSize(Size.VARIABLE());
 		style.setShape(Shape.ROUNDED_RECTANGLE);
 
+		style.setRootPointer(null);
+		style.setPointerBoxes(false);
+		style.setPlaceHolder(false);
+		
 		treePanel.setTree(root);
+
+		reInitMenu();
 	}
 
 	private void sample3(){
@@ -807,13 +922,27 @@ public class TreeView extends JFrame implements Observer{
 				);
 
 		Style style = treePanel.getStyle();
+		style.setFont(initialFont);
+
 		style.setSiblingSeparation(40);
 		style.setSubtreeSeparation(40);
 		style.setLevelSeparation(50);
 		style.setSize(Size.MIN_VARIABLE(20, 25));
-//		style.setPlaceHolder(true);
 
+		style.setRootPointer(null);
+		style.setPointerBoxes(false);
+		style.setPlaceHolder(false);
+		
 		treePanel.setTree(root);
+
+		reInitMenu();
+	}
+
+	private void reInitMenu() {
+		// Redo the Menu
+		JMenuBar menuBar = createMenuLayout();
+		this.setJMenuBar(menuBar);
+		this.revalidate();
 	}
 
 	public static void main(String[] args) {

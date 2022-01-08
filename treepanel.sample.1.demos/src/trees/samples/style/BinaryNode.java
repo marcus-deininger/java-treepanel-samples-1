@@ -1,4 +1,4 @@
-package full;
+package trees.samples.style;
 
 import trees.annotations.Nodes;
 

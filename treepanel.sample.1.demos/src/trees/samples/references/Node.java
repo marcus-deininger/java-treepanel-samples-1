@@ -1,4 +1,4 @@
-package full;
+package trees.samples.references;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +16,6 @@ public class Node {
 	public void add(Node ... nodes){
 		for(Node node : nodes)
 			children.add(node);
-	}
-
-	public boolean delete(Node node) {
-		if(children.remove(node))
-			return true;
-
-		for(Node child : children)
-			if(child.delete(node))
-				return true;
-		
-		return false;
 	}
 
 	@Override

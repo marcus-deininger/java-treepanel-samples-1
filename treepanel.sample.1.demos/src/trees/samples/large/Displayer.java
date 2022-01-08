@@ -1,4 +1,4 @@
-package basic;
+package trees.samples.large;
 
 import java.awt.Dimension;
 
@@ -18,9 +18,9 @@ public class Displayer extends JFrame{
 		style.setShape(Shape.ROUNDED_RECTANGLE);
 		TreePanel<Node> treePanel = new TreePanel<Node>(style, root);
 
-		this.add(treePanel);		
+		this.add(treePanel.addScrollPane());		
 
-		this.setPreferredSize(new Dimension(325, 200));
+		this.setPreferredSize(new Dimension(800, 600));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationByPlatform(true);
 		this.pack();

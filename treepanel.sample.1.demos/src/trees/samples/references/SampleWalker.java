@@ -1,6 +1,5 @@
-package elaborated;
+package trees.samples.references;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -14,7 +13,7 @@ import trees.panel.TreePanel;
 import trees.style.Size;
 import trees.style.Style;
 
-public class Sample1 {
+public class SampleWalker {
 	
 	public static void main(String[] args) {
 				
@@ -60,7 +59,6 @@ public class Sample1 {
 		menu.add(menuItem);	
 		frame.setJMenuBar(menuBar);
 		
-		frame.setPreferredSize(new Dimension(450, 300));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationByPlatform(true);
 		frame.pack();

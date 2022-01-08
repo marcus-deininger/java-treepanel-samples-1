@@ -1,4 +1,4 @@
-package elaborated;
+package trees.samples.large;
 
 import java.util.ArrayList;
 import java.util.List;
