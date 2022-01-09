@@ -1,6 +1,6 @@
 # java-treepanel-samples-1
 
-These are some basic samples how to use the treepanel within an eclipse project. The downloadable project includes the tree-panel-jar and is ready to use. Just download it and use the fitting sample. The following samples / use-cases are included:
+These are some basic samples how to use the treepanel within an eclipse project. The main project is described here: [java-treepanel](https://github.com/marcus-deininger/java-treepanel). The downloadable project includes the tree-panel-jar and is ready to use. Just download it and use the fitting sample. The following samples / use-cases are included:
 - a basic sample: just displaying a tree
 - a clickable sample: displaying a tree where nodes can be selected by mouse
 - a large sample: displaying a tree with more than 100,000 nodes
